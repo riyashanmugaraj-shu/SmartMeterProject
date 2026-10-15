@@ -61,21 +61,34 @@ public class MultiClientServer
                 await sslStream.AuthenticateAsServerAsync(certificate, clientCertificateRequired: false, enabledSslProtocols: System.Security.Authentication.SslProtocols.Tls12
                     | System.Security.Authentication.SslProtocols.Tls13, checkCertificateRevocation: false);
 
-                string? message;
+                //string? message;
 
-                byte[] buffer = new byte[1024];
-                int byteRead = await sslStream.ReadAsync(buffer, 0, buffer.Length);
+                //byte[] buffer = new byte[1024];
+                //int byteRead = await sslStream.ReadAsync(buffer, 0, buffer.Length);
 
-                if (byteRead > 0)
+                //if (byteRead > 0)
+                //{
+                //    message = Encoding.UTF8.GetString(buffer, 0, byteRead);
+                //    Console.WriteLine("Message from the client:" + message);
+
+                //    byte[] response = Encoding.UTF8.GetBytes("Server recieved:" + message);
+                //    await sslStream.WriteAsync(response, 0, response.Length);
+                //}
+
+                using var reader = new StreamReader(sslStream, Encoding.UTF8);
+                using var writer = new StreamWriter(sslStream, Encoding.UTF8) { AutoFlush = true };
+                // Keep reading readings from this client for as long as the connection stays open.
+                // ReadLineAsync returns null only when the client disconnects, which ends the loop.
+
+                string? line;
+                while ((line = await reader.ReadLineAsync()) != null)
                 {
-                    message = Encoding.UTF8.GetString(buffer, 0, byteRead);
-                    Console.WriteLine("Message from the client:" + message);
+                    Console.WriteLine("Reading received: " + line);
 
-                    byte[] response = Encoding.UTF8.GetBytes("Server recieved:" + message);
-                    await sslStream.WriteAsync(response, 0, response.Length);
+                    // temporary acknowledgement for testing — replace with the actual bill
+                    // calculation/push once the service layer exists
+                    await writer.WriteLineAsync("ACK:" + line);
                 }
-
-
             }
 
         }
