@@ -1,0 +1,9 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SmartMeter.Shared;
+
+public record Reading(string ClientId, DateTime Timestamp, double Kwh);

@@ -13,4 +13,8 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SmartMeter.Shared\SmartMeter.Shared.csproj" />
+  </ItemGroup>
+
 </Project>
