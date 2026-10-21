@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using SmartMeter.Shared;
 
 
 public class MultiClientServer
@@ -24,7 +25,6 @@ public class MultiClientServer
 
         //Random random= new Random();
         //double Kwh = 300.00;
-
         //Console.WriteLine("Smart meter reading has started");
 
 
@@ -79,15 +79,17 @@ public class MultiClientServer
                 using var writer = new StreamWriter(sslStream, Encoding.UTF8) { AutoFlush = true };
                 // Keep reading readings from this client for as long as the connection stays open.
                 // ReadLineAsync returns null only when the client disconnects, which ends the loop.
+                var adapter = new JsonReadingAdapter();
 
                 string? line;
                 while ((line = await reader.ReadLineAsync()) != null)
-                {
-                    Console.WriteLine("Reading received: " + line);
 
-                    // temporary acknowledgement for testing — replace with the actual bill
-                    // calculation/push once the service layer exists
-                    await writer.WriteLineAsync("ACK:" + line);
+                {
+                    Reading reading = adapter.Deserialize(line);
+                    Console.WriteLine($"Reading received: {reading.ClientId} - {reading.Kwh} Kwh at {reading.Timestamp:HH:mm:ss}");
+                    
+                    // temp acknowledgement for testing replace with the actual bill
+                    await writer.WriteLineAsync("ACK:" + reading.ClientId);
                 }
             }
 

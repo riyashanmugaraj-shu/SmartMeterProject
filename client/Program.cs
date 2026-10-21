@@ -6,59 +6,64 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Security.Cryptography.X509Certificates;
+using SmartMeter.Shared;
+using client;
 
 
 class ClientCode
 {
     private const int PORT = 7000;
 
-    static void Main()
-    {
+    static async Task Main(string[] args)
+
+        
+    {// every client gets their own id from command line
+        string clientID = args.Length > 0 ? args[0] : "client-01";
         try
         {
             TcpClient client = new TcpClient("127.0.0.1", PORT);
-            Console.WriteLine("Client connected to server");
+            Console.WriteLine($"{clientID} connected to server");
 
-            NetworkStream stream = client.GetStream();
+            //NetworkStream stream = client.GetStream();
 
-            SslStream sslStream = new SslStream(stream, false, new RemoteCertificateValidationCallback(CertificateValidationCallback));
+            SslStream sslStream = new SslStream(client.GetStream(), false,
+            new RemoteCertificateValidationCallback(CertificateValidationCallback));
             sslStream.AuthenticateAsClient("clientName");
 
-            string mockMessage = "Reading-Meter 1-100.00kwh";
-            Console.WriteLine("Sending encrypted message:" + mockMessage);
+            // print anything the server sends back (acknowledgements now, bills and alerts later)
+            using var reader = new StreamReader(sslStream, Encoding.UTF8);
+            _ = Task.Run(async () =>
+            {
+                string? reply;
+                while ((reply = await reader.ReadLineAsync()) != null)
+                    Console.WriteLine("Server says: " + reply);
+            });
 
-            //byte[] data = Encoding.UTF8.GetBytes(mockMessage);
-            //stream.Write(data);
+            var generator = new ReadingGenerator();
+            var adapter = new JsonReadingAdapter();
 
-            //byte[] response = new byte[1024];
-            //int byteRead = stream.Read(response, 0, response.Length);
+            // Runs forever: generate a reading, send it as JSON, wait 15-60 seconds
+            while (true)
+            {
+                Reading reading = generator.GenerateNext(clientID);
+                string json = adapter.Serialize(reading);
+                Console.WriteLine("Sending: " + json);
 
-            //string messageFromServer = Encoding.UTF8.GetString(response, 0, byteRead);
-            //Console.WriteLine(messageFromServer);
+                byte[] data = Encoding.UTF8.GetBytes(json + "\n");
+                await sslStream.WriteAsync(data, 0, data.Length);
 
-            //write to the sslstream
-            sslStream.Write(Encoding.UTF8.GetBytes(mockMessage), 0, mockMessage.Length);
-
-            //read response
-            byte[] response = new byte[1024];
-            int byteRead = stream.Read(response, 0, response.Length);
-            string messageFromServer = Encoding.UTF8.GetString(response, 0, byteRead);
-            Console.WriteLine(messageFromServer);
-
-            Console.WriteLine("closing client connection");
-
-
-
-
+                await Task.Delay(generator.NextDelayMs());
+            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Error:" + ex.Message);
+            Console.WriteLine("Error: " + ex.Message);
         }
-
     }
-    static bool CertificateValidationCallback( object sender, X509Certificate? certificate, X509Chain? chain, SslPolicyErrors sslPolicyErrors)
+
+    static bool CertificateValidationCallback(object sender, X509Certificate? certificate, X509Chain? chain, SslPolicyErrors sslPolicyErrors)
     {
+        // Accepts our self-signed development certificate
         return true;
     }
 }
