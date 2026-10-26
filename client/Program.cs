@@ -30,7 +30,7 @@ class ClientCode
             new RemoteCertificateValidationCallback(CertificateValidationCallback));
             sslStream.AuthenticateAsClient("clientName");
 
-            // print anything the server sends back (acknowledgements now, bills and alerts later)
+            // print anything the server sends back (acknowledgements atm, bills and alerts later)
             using var reader = new StreamReader(sslStream, Encoding.UTF8);
             _ = Task.Run(async () =>
             {
@@ -42,7 +42,7 @@ class ClientCode
             var generator = new ReadingGenerator();
             var adapter = new JsonReadingAdapter();
 
-            // Runs forever: generate a reading, send it as JSON, wait 15-60 seconds
+            // runs forever generate a reading, send it as JSON, wait 15-60 seconds
             while (true)
             {
                 Reading reading = generator.GenerateNext(clientID);
@@ -63,7 +63,7 @@ class ClientCode
 
     static bool CertificateValidationCallback(object sender, X509Certificate? certificate, X509Chain? chain, SslPolicyErrors sslPolicyErrors)
     {
-        // Accepts our self-signed development certificate
+        // accepts self-signed development certificate
         return true;
     }
 }

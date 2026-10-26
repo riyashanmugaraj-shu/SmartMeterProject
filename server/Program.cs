@@ -16,6 +16,9 @@ public class MultiClientServer
     private static TcpListener? server;
 
     private const int PORT = 7000;
+    private static readonly IreadingRepository _repository = ReadingRepository.Instance;
+    // singleton - the single instance is reached through ReadingRepository
+    // every client handler writes to this same store
 
     static async Task Main()
     {
@@ -77,8 +80,8 @@ public class MultiClientServer
 
                 using var reader = new StreamReader(sslStream, Encoding.UTF8);
                 using var writer = new StreamWriter(sslStream, Encoding.UTF8) { AutoFlush = true };
-                // Keep reading readings from this client for as long as the connection stays open.
-                // ReadLineAsync returns null only when the client disconnects, which ends the loop.
+                // keep reading readings from this client for as long as the connection stays open
+                // ReadLineAsync returns null only when the client disconnects, which ends the loop
                 var adapter = new JsonReadingAdapter();
 
                 string? line;
@@ -87,8 +90,9 @@ public class MultiClientServer
                 {
                     Reading reading = adapter.Deserialize(line);
                     Console.WriteLine($"Reading received: {reading.ClientId} - {reading.Kwh} Kwh at {reading.Timestamp:HH:mm:ss}");
-                    
-                    // temp acknowledgement for testing replace with the actual bill
+
+                    _repository.Add(reading);                                        
+                    Console.WriteLine($"Stored. Total readings: {_repository.Count}");
                     await writer.WriteLineAsync("ACK:" + reading.ClientId);
                 }
             }

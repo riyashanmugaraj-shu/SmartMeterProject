@@ -1,4 +1,5 @@
 <Solution>
+  <Folder Name="/Solution Items/" />
   <Project Path="client/client.csproj" />
   <Project Path="server/server.csproj" />
   <Project Path="SmartMeter.Shared/SmartMeter.Shared.csproj" />
