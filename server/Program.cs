@@ -20,6 +20,8 @@ public class MultiClientServer
     // singleton - the single instance is reached through ReadingRepository
     // every client handler writes to this same store
 
+    private static readonly BillingCalculator _billingCalculator = new BillingCalculator(new StandardBillingStrategy(0.25m));
+
     static async Task Main()
     {
         server = new TcpListener(IPAddress.Any, PORT);
@@ -33,11 +35,24 @@ public class MultiClientServer
 
         while (true)
         {
-            var client = await server.AcceptTcpClientAsync();
-            Console.WriteLine("Client successfully connected");
+            try
+            {
+                var client = await server.AcceptTcpClientAsync();
 
-            //HandleClientAsync(client);
-            _ = Task.Run(() => HandleClientAsync(client));
+                Console.WriteLine(
+                    "Client successfully connected");
+
+                _ = HandleClientAsync(client);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(
+                    "Server connection error: " + ex.Message);
+
+                await CommunicationLogger.LogErrorAsync(
+                    "Error accepting a client connection",
+                    ex);
+            }
         }
 
 
@@ -47,7 +62,7 @@ public class MultiClientServer
     }
 
 
-    private static async void HandleClientAsync(TcpClient client)
+    private static async Task HandleClientAsync(TcpClient client)
     {
 
 
@@ -88,33 +103,56 @@ public class MultiClientServer
                 while ((line = await reader.ReadLineAsync()) != null)
 
                 {
-                    Reading reading = adapter.Deserialize(line);
-                    Console.WriteLine($"Reading received: {reading.ClientId} - {reading.Kwh} Kwh at {reading.Timestamp:HH:mm:ss}");
+                    // TEMPORARY TEST - REMOVE AFTER TESTING
+                    // throw new IOException("TEST: Simulated communication failure");
 
-                    _repository.Add(reading);                                        
-                    Console.WriteLine($"Stored. Total readings: {_repository.Count}");
-                    await writer.WriteLineAsync("ACK:" + reading.ClientId);
+                    Reading reading = adapter.Deserialize(line);
+
+                    Console.WriteLine(
+                        $"Reading received: {reading.ClientId} - " +
+                        $"{reading.Kwh} Kwh at {reading.Timestamp:HH:mm:ss}");
+
+                    _repository.Add(reading);
+
+                    Console.WriteLine(
+                        $"Stored. Total readings: {_repository.Count}");
+
+                    // This gets all readings belonging to this client
+                    var clientReadings = _repository.GetByClient(reading.ClientId);
+
+                    // Then calculates the current bill using the Strategy pattern
+                    decimal liveBill =
+                        _billingCalculator.CalculateBill(clientReadings);
+
+                    Console.WriteLine(
+                        $"Live bill for {reading.ClientId}: £{liveBill:F2}");
+
+                    await writer.WriteLineAsync(
+                        "ACK:" + reading.ClientId);
+
+                    // Pushes the updated bill back to the client
+                    await writer.WriteLineAsync(
+                        $"BILL:{reading.ClientId}:£{liveBill:F2}");
                 }
             }
 
         }
+
         catch (Exception ex)
         {
-            Console.WriteLine("Error:" + ex.Message);
+            Console.WriteLine(
+                "Communication error: " + ex.Message);
+
+            await CommunicationLogger.LogErrorAsync(
+                "Communication error with client",
+                ex);
         }
         finally
         {
             client.Close();
-            Console.WriteLine("Client Disconnected Successfully");
+            Console.WriteLine(
+                "Client Disconnected Successfully");
         }
-
-
-
-
-
-
-
-
 
     }
 
