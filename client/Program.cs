@@ -19,6 +19,10 @@ class ClientCode
         
     {// every client gets their own id from command line
         string clientID = args.Length > 0 ? args[0] : "client-01";
+
+        var errorNotifier = new CommunicationErrorNotifier();
+        errorNotifier.Attach(new ConsoleErrorObserver());
+
         try
         {
             TcpClient client = new TcpClient("127.0.0.1", PORT);
@@ -32,11 +36,32 @@ class ClientCode
 
             // print anything the server sends back (acknowledgements atm, bills and alerts later)
             using var reader = new StreamReader(sslStream, Encoding.UTF8);
+
             _ = Task.Run(async () =>
             {
-                string? reply;
-                while ((reply = await reader.ReadLineAsync()) != null)
-                    Console.WriteLine("Server says: " + reply);
+                try
+                {
+                    string? reply;
+
+                    while ((reply = await reader.ReadLineAsync()) != null)
+                    {
+                        Console.WriteLine("Server says: " + reply);
+                    }
+
+                    // The server has closed the connection
+                    errorNotifier.Notify(
+                        "Connection to server has been lost.");
+                }
+                catch (IOException ex)
+                {
+                    errorNotifier.Notify(
+                        "Error receiving data from server: " + ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    errorNotifier.Notify(
+                        "Unexpected error receiving data: " + ex.Message);
+                }
             });
 
             var generator = new ReadingGenerator();
@@ -57,7 +82,8 @@ class ClientCode
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Error: " + ex.Message);
+            errorNotifier.Notify(
+                "Connection or communication error: " + ex.Message);
         }
     }
 
