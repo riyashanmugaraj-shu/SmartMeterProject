@@ -1,4 +1,5 @@
-﻿using server;
+﻿//https://www.c-sharpcorner.com/article/mastering-the-factory-pattern-in-c-sharp-13-best-practices-with-real-world-examples
+using server;
 
 
 namespace FactoryMethodTests
@@ -28,7 +29,7 @@ namespace FactoryMethodTests
             GridAlert alert = GridAlertFactory.CreateAlert();
             string message = alert.GetMessage();
 
-            //
+            //ASSERT
             Assert.That(alert, Is.Not.Null);
             Assert.That(message, Is.Not.Null);
             Assert.That(message, Is.Not.Empty);
