@@ -142,7 +142,7 @@ public class MultiClientServer
                     // Randomly simulates electricity grid issues
                     // if (true) to test
                     // if (true)
-                    if (_random.Next(1, 11) == 1)
+                    if (_random.Next(1, 7) == 1)
                     {
                         // Creates the alert using Factory pattern
                         GridAlert alert = GridAlertFactory.CreateAlert();

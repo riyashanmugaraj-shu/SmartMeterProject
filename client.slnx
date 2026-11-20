@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/Solution Items/" />
   <Project Path="client/client.csproj" />
+  <Project Path="FactoryMethodTests/FactoryMethodTests.csproj" Id="dcef9133-f171-49d2-99c7-b0e35cf2d74d" />
   <Project Path="server/server.csproj" />
   <Project Path="SmartMeter.Shared/SmartMeter.Shared.csproj" />
 </Solution>

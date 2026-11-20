@@ -8,7 +8,7 @@ namespace server
 {
     // Alert representing high demand on the electricity grid
     // Concrete creator 
-    internal class HighDemandAlert : GridAlert
+    public class HighDemandAlert : GridAlert
     {
         // Message displayed to clients when high demand is detected
         public override string GetMessage()

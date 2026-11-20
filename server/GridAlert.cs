@@ -8,7 +8,7 @@ namespace server
 {
     // Base class for grid alerts (potential to add more)
     // Creator for factory pattern
-    internal abstract class GridAlert
+    public abstract class GridAlert
     {
         // Returns the alert message that will be pushed to clients
         public abstract string GetMessage();

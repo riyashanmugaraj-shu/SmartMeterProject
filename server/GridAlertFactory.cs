@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace server
 {
     // Factory Pattern for creating alert objects at random times
-    internal static class GridAlertFactory
+    public static class GridAlertFactory
     {
         private static readonly Random _random = new Random();
 
