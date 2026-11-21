@@ -1,5 +1,7 @@
 ﻿//https://www.youtube.com/watch?v=eYHOZhMA7OI
 //https://github.com/mrconter1/Simple-TCP-Communication-SSLStream/blob/master/server.pfx
+using server;
+using SmartMeter.Shared;
 using System;
 using System.Net;
 using System.Net.Security;
@@ -7,8 +9,6 @@ using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using SmartMeter.Shared;
-
 
 public class MultiClientServer
 {
@@ -21,6 +21,9 @@ public class MultiClientServer
     // every client handler writes to this same store
 
     private static readonly BillingCalculator _billingCalculator = new BillingCalculator(new StandardBillingStrategy(0.25m));
+
+    // Used to randomly simulate electricity grid issues for the alerts
+    private static readonly Random _random = new Random();
 
     static async Task Main()
     {
@@ -124,15 +127,30 @@ public class MultiClientServer
                     decimal liveBill =
                         _billingCalculator.CalculateBill(clientReadings);
 
-                    Console.WriteLine(
-                        $"Live bill for {reading.ClientId}: £{liveBill:F2}");
+                    // adding the electricity usage to the live bill
+                    double totalUsage =
+                        clientReadings.Sum(r => r.Kwh);
 
+                    // Sending acknowledgement back to the client
                     await writer.WriteLineAsync(
                         "ACK:" + reading.ClientId);
 
-                    // Pushes the updated bill back to the client
+                    // updated bill and total electricity usage back to the client
                     await writer.WriteLineAsync(
-                        $"BILL:{reading.ClientId}:£{liveBill:F2}");
+                        $"BILL:{reading.ClientId}:£{liveBill:F2}:{totalUsage:F2}");
+
+                    // Randomly simulates electricity grid issues
+                    // if (true) to test
+                    // if (true)
+                    if (_random.Next(1, 7) == 1)
+                    {
+                        // Creates the alert using Factory pattern
+                        GridAlert alert = GridAlertFactory.CreateAlert();
+
+                        // Pushes the alert message to the client
+                        await writer.WriteLineAsync(
+                            $"ALERT:{alert.GetMessage()}");
+                    }
                 }
             }
 

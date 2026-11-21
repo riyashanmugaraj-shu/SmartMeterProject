@@ -43,9 +43,41 @@ class ClientCode
                 {
                     string? reply;
 
+                    // Alert messages received from the server
                     while ((reply = await reader.ReadLineAsync()) != null)
                     {
-                        Console.WriteLine("Server says: " + reply);
+                        if (reply.StartsWith("BILL:"))
+                        {
+                            string[] parts = reply.Split(':');
+
+                            Console.ForegroundColor = ConsoleColor.DarkMagenta;
+
+                            Console.WriteLine();
+                            Console.WriteLine("===== LIVE BILL UPDATE =====");
+                            Console.WriteLine($"Meter ID: {parts[1]}");
+                            Console.WriteLine($"Current Bill: {parts[2]}");
+                            Console.WriteLine($"Total Usage: {parts[3]} kWh");
+                            Console.WriteLine("============================");
+                            Console.WriteLine();
+
+                            Console.ResetColor();
+                        }
+                        else if (reply.StartsWith("ALERT:"))
+                        {
+                            Console.ForegroundColor = ConsoleColor.DarkGreen;
+
+                            Console.WriteLine();
+                            Console.WriteLine("***** GRID ALERT *****");
+                            Console.WriteLine(reply.Replace("ALERT:", ""));
+                            Console.WriteLine("**********************");
+                            Console.WriteLine();
+
+                            Console.ResetColor();
+                        }
+                        else
+                        {
+                            Console.WriteLine("Server says: " + reply);
+                        }
                     }
 
                     // The server has closed the connection
