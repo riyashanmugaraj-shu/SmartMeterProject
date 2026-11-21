@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace server
 {
     // Alert representing high demand on the electricity grid
-    // Concrete creator 
+    
     public class HighDemandAlert : GridAlert
     {
         // Message displayed to clients when high demand is detected
