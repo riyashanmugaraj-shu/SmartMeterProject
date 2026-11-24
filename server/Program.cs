@@ -115,6 +115,20 @@ public class MultiClientServer
                         $"Reading received: {reading.ClientId} - " +
                         $"{reading.Kwh} Kwh at {reading.Timestamp:HH:mm:ss}");
 
+                    // Validate the incoming reading
+                    if (string.IsNullOrWhiteSpace(reading.ClientId) ||
+                        reading.Kwh <= 0 ||
+                        double.IsNaN(reading.Kwh) ||
+                        double.IsInfinity(reading.Kwh))
+                    {
+                        Console.WriteLine("Invalid reading received.");
+
+                        await writer.WriteLineAsync(
+                            "ERROR: Invalid meter reading");
+
+                        continue;
+                    }
+
                     _repository.Add(reading);
 
                     Console.WriteLine(
