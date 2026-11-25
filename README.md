@@ -14,9 +14,9 @@ grid alerts back to the clients, and logs communication errors. Messages are sen
 
 ## Docker commands
 ```
-docker run --rm --name server-box smartmeter-server
+- docker run --rm --name server-box smartmeter-server
 ```
-docker run --rm --network container:server-box smartmeter-client
+- docker run --rm --network container:server-box smartmeter-client
 
 ## Requirements
 - Windows with Visual Studio 2022 
