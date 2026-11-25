@@ -13,7 +13,9 @@ grid alerts back to the clients, and logs communication errors. Messages are sen
 - NUnit for automated tests
 
 ## Docker commands
+```
 docker run --rm --name server-box smartmeter-server
+```
 docker run --rm --network container:server-box smartmeter-client
 
 ## Requirements
