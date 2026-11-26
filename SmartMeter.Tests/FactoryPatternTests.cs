@@ -16,6 +16,7 @@ namespace FactoryMethodTests
             
 
             // ASSERT
+            //ensures alert is not empty and instance is created
             Assert.That(alert, Is.Not.Null);
             Assert.That(alert, Is.InstanceOf<GridAlert>());
         }
@@ -30,10 +31,20 @@ namespace FactoryMethodTests
             string message = alert.GetMessage();
 
             //ASSERT
+            //ensures the alert and message is not null or empty
             Assert.That(alert, Is.Not.Null);
             Assert.That(message, Is.Not.Null);
             Assert.That(message, Is.Not.Empty);
 
         }
+
+      
+      
+            
+               
+                
+            
+            
+        
     }
 }
