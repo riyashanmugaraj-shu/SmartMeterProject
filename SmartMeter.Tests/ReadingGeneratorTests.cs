@@ -17,8 +17,8 @@ public class ReadingGeneratorTests
     {
         var generator = new ReadingGenerator();
 
-        // The server tells clients apart by this ID
-        Assert.That(generator.GenerateNext("client-07").ClientId, Is.EqualTo("client-07"));
+        // server tells clients apart by this ID
+         Assert.That(generator.GenerateNext("client-07").ClientId, Is.EqualTo("client-07"));
     }
 
     [Test]
@@ -26,7 +26,7 @@ public class ReadingGeneratorTests
     {
         var generator = new ReadingGenerator();
 
-        // Repeat many times because the values are random
+        // repeat many times because the values are random
         for (int i = 0; i < 1000; i++)
             Assert.That(generator.GenerateNext("c").Kwh, Is.GreaterThanOrEqualTo(0.1));
     }
@@ -39,9 +39,7 @@ public class ReadingGeneratorTests
         for (int i = 0; i < 200; i++)
         {
             double kwh = generator.GenerateNext("c").Kwh;
-
-            // Rounding it again should change nothing if it was already 2 d.p.
-            Assert.That(Math.Round(kwh, 2), Is.EqualTo(kwh));
+           Assert.That(Math.Round(kwh, 2), Is.EqualTo(kwh));
         }
     }
 
@@ -55,9 +53,8 @@ public class ReadingGeneratorTests
         {
             double current = generator.GenerateNext("c").Kwh;
 
-            // "Realistic": usage drifts gradually (max step is 0.2, plus rounding)
             Assert.That(Math.Abs(current - previous), Is.LessThanOrEqualTo(0.21));
-            previous = current;
+           previous = current;
         }
     }
 
@@ -66,9 +63,9 @@ public class ReadingGeneratorTests
     {
         var generator = new ReadingGenerator();
 
-        var reading = generator.GenerateNext("c");
+       var reading = generator.GenerateNext("c");
 
-        // Timestamp should be "now" in UTC, give or take a few seconds
+        // Timestamp should be "now" in UTC
         Assert.That(reading.Timestamp, Is.EqualTo(DateTime.UtcNow).Within(5).Seconds);
     }
 
@@ -77,8 +74,7 @@ public class ReadingGeneratorTests
     {
         var generator = new ReadingGenerator();
 
-        // Brief requirement: readings are randomly spaced 15-60 s apart.
-        // This also catches a short testing delay left in by mistake.
+        //  catches a short testing delay left in by mistake.
         for (int i = 0; i < 1000; i++)
             Assert.That(generator.NextDelayMs(), Is.InRange(15000, 60000));
     }

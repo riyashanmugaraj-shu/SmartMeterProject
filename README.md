@@ -89,10 +89,6 @@ Connections use TLS (`SslStream`). A self-signed development certificate (`serve
 is included so the project runs straight after cloning. It is for this coursework only.
 [Hana: describe how each connection is authenticated before the client connects.]
 
-## Configuration
-[If the grid-alert behaviour is controlled by a setting, describe the file and the
-`true` / `false` options here.]
-
 ## Team
 | Member | Contribution |
 |---|---|
