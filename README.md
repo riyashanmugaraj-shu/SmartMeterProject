@@ -54,9 +54,6 @@ Or in Visual Studio: open `client.slnx`, then **Build > Rebuild Solution**.
 Each client window shows the readings it sends, the server's `ACK` replies, and the live
 bill, which updates every time a reading is sent.
 
-## Run with Docker
-[Riya / Hana add the Docker build and run commands here.]
-
 ## Run the tests
 ```
 dotnet test client.slnx
